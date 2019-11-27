@@ -1,26 +1,46 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import {
+  StylesProvider,
+  ThemeProvider as MuiThemeProvider
+} from '@material-ui/core/styles';
+import { useDispatch } from 'react-redux';
+import { Container } from '@material-ui/core';
+import { ThemeProvider } from 'styled-components';
+import { theme, GlobalStyle } from './styles';
+import { useAsyncFetch } from './services/api';
+import { setProducts } from './store/reducers/products/actions';
+import ProgressBar from './components/ProgressBar';
+import Products from './components/Products';
+import Header from './components/Header';
+import PageTitle from './components/PageTitle';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+const App = () => {
+  const [result, loading] = useAsyncFetch(
+    '/challenge-3/response.json?callback=catch'
   );
-}
+  useDispatch()(setProducts(result));
+  return (
+    <StylesProvider injectFirst>
+      <MuiThemeProvider theme={theme}>
+        <ThemeProvider theme={theme}>
+          <GlobalStyle />
+          <Header />
+          <Container maxWidth="lg">
+            {loading ? (
+              <ProgressBar />
+            ) : loading === null ? (
+              <h1>no products found</h1>
+            ) : (
+              <>
+                <PageTitle />
+                <Products />
+              </>
+            )}
+          </Container>
+        </ThemeProvider>
+      </MuiThemeProvider>
+    </StylesProvider>
+  );
+};
 
 export default App;
